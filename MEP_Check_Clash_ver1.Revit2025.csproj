@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <OutputType>Library</OutputType>
+    <PlatformTarget>x64</PlatformTarget>
+    <AssemblyName>MEP_Check_Clash_ver1</AssemblyName>
+    <RootNamespace>MEP_Check_Clash_ver1</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <EnableDefaultPageItems>false</EnableDefaultPageItems>
+    <RevitInstallDir Condition="'$(RevitInstallDir)' == ''">C:\Program Files\Autodesk\Revit 2025</RevitInstallDir>
+    <OutputPath>bin\2025\$(Configuration)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <DefineConstants>$(DefineConstants);REVIT2025</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\ClashLogo.png"><LogicalName>ClashSolution.Logo</LogicalName></EmbeddedResource>
+    <Compile Include="UI\ClashPreview.cs" />
+    <Reference Include="RevitAPI"><HintPath>$(RevitInstallDir)\RevitAPI.dll</HintPath><Private>false</Private><ExternallyResolved>true</ExternallyResolved></Reference>
+    <Reference Include="RevitAPIUI"><HintPath>$(RevitInstallDir)\RevitAPIUI.dll</HintPath><Private>false</Private><ExternallyResolved>true</ExternallyResolved></Reference>
+    <Compile Include="App.cs;Models.cs;ClashEngine.cs;ProfileStore.cs;ResultExporter.cs;FileSave.cs;Diagnostics.cs;RevitRequest.cs;UI\ClashWindow.xaml.cs;Properties\AssemblyInfo.cs" />
+    <Page Include="UI\ClashWindow.xaml" />
+  </ItemGroup>
+</Project>

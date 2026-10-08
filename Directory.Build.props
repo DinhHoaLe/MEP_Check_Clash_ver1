@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'MEP_Check_Clash_ver1'">
+    <RevitVersion Condition="'$(RevitVersion)' == ''">2023</RevitVersion>
+    <BaseIntermediateOutputPath>obj\$(RevitVersion)\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'MEP_Check_Clash_ver1.Revit2025'">
+    <BaseIntermediateOutputPath>obj\2025\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>
