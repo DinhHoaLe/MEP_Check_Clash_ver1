@@ -13,6 +13,7 @@ $path=Join-Path $folder 'profiles.json'
 $fixture='{"schema":1,"profiles":[{"name":"MEP – Kết cấu","source_a_key":"HOST","source_b_key":"LINK:sample","categories_a":[{"id":-2008044,"name":"Pipes"}],"categories_b":[],"scope":"levels","levels":[{"id":42,"name":"Level 02"}],"include_nonvisible":false,"show_system_details":true,"filters_a":[{"parameter":"System Type","operator":"Contains","value":"CHW"}],"filter_mode_a":"any"}]}'
 [IO.File]::WriteAllText($path,$fixture,[Text.UTF8Encoding]::new($false))
 $profiles=[MEP_Check_Clash_ver1.ProfileStore]::Load($path)
+if ($profiles[0].ColorA -ne '#32CD32' -or $profiles[0].ColorB -ne '#FF3333' -or !$profiles[0].ColorOnViewClash) { throw 'Legacy profile color defaults failed.' }
 if ($profiles.Count -ne 1 -or $profiles[0].FiltersA[0].Value -ne 'CHW' -or $profiles[0].CategoriesA[0].Id -ne -2008044) { throw 'Python profile import failed.' }
 [MEP_Check_Clash_ver1.ProfileStore]::Save($profiles,$path)
 $reloaded=[MEP_Check_Clash_ver1.ProfileStore]::Load($path)
@@ -37,9 +38,11 @@ try { $criteria.Validate() } catch { $invalid=$true }
 if (!$invalid) { throw 'NaN threshold was accepted.' }
 $profiles[0].Criteria=[MEP_Check_Clash_ver1.ClashCriteria]@{MinVolumeCm3=3.75;MinIntersectionBoxMm=8;IgnoreConnectedMep=$true}
 $profiles[0].Scope='active_view_level'
+$profiles[0].ColorA='#3399FF'; $profiles[0].ColorB='#FFD700'; $profiles[0].ColorOnViewClash=$false
 $portable=Join-Path $folder 'portable-profile.json'
 [MEP_Check_Clash_ver1.ProfileStore]::Save($profiles,$portable)
 $portableProfiles=[MEP_Check_Clash_ver1.ProfileStore]::Load($portable)
+if ($portableProfiles[0].ColorA -ne '#3399FF' -or $portableProfiles[0].ColorB -ne '#FFD700' -or $portableProfiles[0].ColorOnViewClash) { throw 'Portable profile color settings were lost.' }
 if ($portableProfiles[0].Scope -ne 'active_view_level' -or $portableProfiles[0].Criteria.MinVolumeCm3 -ne 3.75 -or $portableProfiles[0].Criteria.MinIntersectionBoxMm -ne 8 -or !$portableProfiles[0].Criteria.IgnoreConnectedMep -or $portableProfiles[0].FiltersA[0].Value -ne 'CHW') { throw 'Portable profile did not preserve scope, filters and criteria.' }
 $bad=Join-Path $folder 'invalid-profile.json'
 [IO.File]::WriteAllText($bad,'{ invalid')

@@ -3,7 +3,7 @@ $ErrorActionPreference='Stop'
 Add-Type -AssemblyName PresentationFramework,PresentationCore,WindowsBase,System.Xaml
 $path=Join-Path $PSScriptRoot '..\UI\ClashWindow.xaml'
 [xml]$xml=Get-Content -LiteralPath $path -Raw -Encoding UTF8
-$events=@('Click','Checked','Unchecked','Closing','StateChanged','SelectionChanged','TextChanged','MouseLeftButtonDown','MouseLeftButtonUp','MouseMove','MouseWheel')
+$events=@('Click','Checked','Unchecked','Closing','StateChanged','SelectionChanged','TextChanged','MouseLeftButtonDown','MouseLeftButtonUp','MouseMove','MouseWheel','LostKeyboardFocus')
 foreach ($node in $xml.SelectNodes('//*')) {
     foreach ($attribute in @($node.Attributes)) {
         if (($attribute.LocalName -eq 'Class' -and $attribute.NamespaceURI -eq 'http://schemas.microsoft.com/winfx/2006/xaml') -or $events -contains $attribute.Name) { $node.RemoveAttributeNode($attribute) | Out-Null }
@@ -23,7 +23,7 @@ $window.FindName('ProfileName').Text='MEP vs Structure'
 $window.FindName('ViewLevelHint').Text='Active view: Level 02 - Coordination → Level 02'
 $window.FindName('LevelsDropdown').ItemsSource=@('Active View Level','Level 01','Level 02','Level 03' | ForEach-Object { [pscustomobject]@{Name=$_;IsChecked=$false} })
 $window.FindName('LevelsDropdown').Text='Select levels'
-$window.FindName('VersionText').Text='v1.2.0.0'
+$window.FindName('VersionText').Text='v1.3.2.0'
 $window.FindName('ToolLogo').Source=[System.Windows.Media.Imaging.BitmapImage]::new([Uri]::new((Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\Assets\ClashLogo.png')).Path))
 $window.FindName('View3DCombo').ItemsSource=@([pscustomobject]@{Name='{3D} - Coordination'})
 $window.FindName('View3DCombo').SelectedIndex=0
@@ -34,7 +34,7 @@ $window.FindName('ResultsGrid').ItemsSource=@(1..12 | ForEach-Object { [pscustom
 $scene=[System.Windows.Media.Media3D.Model3DGroup]::new()
 $scene.Children.Add([System.Windows.Media.Media3D.AmbientLight]::new([System.Windows.Media.Color]::FromRgb(150,150,150)))
 $scene.Children.Add([System.Windows.Media.Media3D.DirectionalLight]::new([System.Windows.Media.Colors]::White,[System.Windows.Media.Media3D.Vector3D]::new(-1,-1,-2)))
-foreach ($box in @(@(-3,-0.25,-0.25,3,0.25,0.25,'#90805C'),@(-0.4,-2,-0.5,0.4,2,0.5,'#568CAD'))) {
+foreach ($box in @(@(-3,-0.25,-0.25,3,0.25,0.25,'#32CD32'),@(-0.4,-2,-0.5,0.4,2,0.5,'#FF3333'))) {
     $mesh=[System.Windows.Media.Media3D.MeshGeometry3D]::new()
     foreach ($point in @(@($box[0],$box[1],$box[2]),@($box[3],$box[1],$box[2]),@($box[3],$box[4],$box[2]),@($box[0],$box[4],$box[2]),@($box[0],$box[1],$box[5]),@($box[3],$box[1],$box[5]),@($box[3],$box[4],$box[5]),@($box[0],$box[4],$box[5]))) { $mesh.Positions.Add([System.Windows.Media.Media3D.Point3D]::new($point[0],$point[1],$point[2])) }
     foreach ($index in @(0,2,1,0,3,2,4,5,6,4,6,7,0,1,5,0,5,4,1,2,6,1,6,5,2,3,7,2,7,6,3,0,4,3,4,7)) { $mesh.TriangleIndices.Add($index) }
@@ -61,7 +61,7 @@ foreach ($width in @(1700,1360)) {
     Write-Output $target
 }
 $body=$root.Children | Where-Object { $_ -is [System.Windows.Controls.Grid] -and [System.Windows.Controls.Grid]::GetRow($_) -eq 1 } | Select-Object -First 1
-$scroll=$body.Children | Where-Object { $_ -is [System.Windows.Controls.ScrollViewer] } | Select-Object -First 1
+$scroll=$body.Children[0].Children | Where-Object { $_ -is [System.Windows.Controls.ScrollViewer] } | Select-Object -First 1
 $scroll.ScrollToEnd()
 $root.UpdateLayout()
 $bitmap=[System.Windows.Media.Imaging.RenderTargetBitmap]::new(1360,808,96,96,[System.Windows.Media.PixelFormats]::Pbgra32)

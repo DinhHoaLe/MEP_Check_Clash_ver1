@@ -87,4 +87,14 @@ Lỗi thao tác được hiện ở thanh trạng thái; chi tiết ghi tại `%
 - `Min intersection box size (mm)` yêu cầu cả ba kích thước X/Y/Z của bounding box bao quanh phần giao trong tọa độ host đạt ngưỡng; 0 tắt điều kiện này. Đây là điều kiện kích thước hộp phần giao, không phải độ xuyên, khoảng cách clearance hay phép đo khoảng cách chính xác giữa hai vật thể.
 - `Ignore directly connected MEP pairs` bỏ cặp nối vật lý trực tiếp qua connector trong cùng source. Mặc định tắt. Không bỏ cặp chỉ vì cùng System Type.
 - Kiểm tra tiêu chí không âm/hữu hạn, strict volume boundary, box boundary, zero-volume contact và lưu/import toàn bộ criteria đã pass trong `tools/Verify-Core.ps1`. Build Release 2023/2024/2025 và QA XAML đã pass. Phát hiện geometry và nối connector thực tế vẫn cần kiểm thử trong Revit.
-- Phiên bản hiện tại: **v1.2.0.0**. Khởi động lại Revit trước khi nạp DLL mới khi dùng Addin Manager.
+- Phiên bản hiện tại: **v1.3.2.0**. Khởi động lại Revit trước khi nạp DLL mới khi dùng Addin Manager.
+- Bố cục v1.3.2: All/Clear thay Common ở cả hai set; All chọn toàn bộ category geometry trong set, kể cả category đang bị ẩn bởi ô tìm kiếm. Toolbar Parameter Filters trên một hàng; ô màu nằm cạnh mã màu; Conditions/Colors cạnh nhau. Refresh sources và Run Hard Clash cùng chiều cao 38; bảng có đường phân cách giữa hai nhóm A/B.
+- Bố cục v1.3.1: Set A/B ngay dưới Clash Profile; Clash Colors bên trái dưới Clash Conditions; Run Hard Clash cạnh Refresh sources, ngoài vùng cuộn và các khung thiết lập.
+
+Clash Colors (v1.3.0):
+- Chọn màu riêng cho A/B hoặc nhập mã #RRGGBB; mặc định A xanh lá #32CD32, B đỏ #FF3333. Preview 3D dùng màu đã chọn cho cả host và link. Profile Save/Export/Import giữ màu và tùy chọn tự tô khi View clash; profile cũ nhận màu mặc định.
+- `Color selected` tô hai phần tử của clash đang chọn trong active view. `Color all results` tô các phần tử thuộc tất cả kết quả. Mỗi phần tử chỉ được xử lý một lần; nếu nằm ở cả A và B, màu B được ưu tiên.
+- `Apply colors when opening View clash` tự tô cặp đang chọn trong view 3D được mở. Overrides áp dụng cho line, solid surface/cut foreground fill, tắt halftone và transparency của các phần tử đó trong view.
+- `Restore colors` phục hồi toàn bộ element overrides ban đầu của những phần tử tool đã tô trong active view, trong phiên cửa sổ tool hiện tại. Nếu đóng tool rồi mở lại, dùng Undo Revit hoặc quản lý Overrides của view để phục hồi. Thao tác tô và phục hồi đều là transaction có thể Undo.
+- Chỉ tô trực tiếp phần tử thuộc current model. Phần tử trong Revit Link hiển thị màu ở preview; tool không tô cả link hoặc sửa file link. Số phần tử link bị bỏ qua được báo trong status.
+- Build 2023/2024/2025, profile color defaults/roundtrip và render XAML đã kiểm tra; override màu thực tế cần kiểm tra trong Revit.

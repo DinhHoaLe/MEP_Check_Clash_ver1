@@ -26,7 +26,7 @@ $assembly=Join-Path $output 'MEP_Check_Clash_ver1.dll'
 $manifest=Join-Path $output 'ClashSolution.addin'
 $xml=New-Object System.Xml.XmlDocument
 $xml.LoadXml('<RevitAddIns><AddIn Type="Application"><Name>Clash Solution CSharp</Name><Assembly/><AddInId>9DDF35BD-8C17-4C78-A591-2B1CB29679D4</AddInId><FullClassName>MEP_Check_Clash_ver1.App</FullClassName><VendorId>CLSH</VendorId><VendorDescription>Clash Solution</VendorDescription></AddIn></RevitAddIns>')
-$xml.RevitAddIns.AddIn.Assembly=$assembly
+$xml.SelectSingleNode('/RevitAddIns/AddIn/Assembly').InnerText=[string]$assembly
 $xml.Save($manifest)
 Write-Output "DLL: $assembly"
 Write-Output "Manifest: $manifest"

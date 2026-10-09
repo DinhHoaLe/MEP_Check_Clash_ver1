@@ -165,7 +165,10 @@ namespace MEP_Check_Clash_ver1
         [DataMember(Name="filter_mode_a")] public string FilterModeA { get; set; }
         [DataMember(Name="filter_mode_b")] public string FilterModeB { get; set; }
         [DataMember(Name="clash_criteria")] public ClashCriteria Criteria { get; set; } = new ClashCriteria();
-        [OnDeserializing] private void Defaults(StreamingContext context) { ShowSystemDetails = true; Criteria=new ClashCriteria(); }
+        [DataMember(Name="color_a")] public string ColorA { get; set; } = "#32CD32";
+        [DataMember(Name="color_b")] public string ColorB { get; set; } = "#FF3333";
+        [DataMember(Name="color_on_view_clash")] public bool ColorOnViewClash { get; set; } = true;
+        [OnDeserializing] private void Defaults(StreamingContext context) { ShowSystemDetails = true; Criteria=new ClashCriteria(); ColorA="#32CD32"; ColorB="#FF3333"; ColorOnViewClash=true; }
     }
     [DataContract]
     public class ProfilePayload

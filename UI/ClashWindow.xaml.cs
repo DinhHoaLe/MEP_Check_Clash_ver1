@@ -70,6 +70,7 @@ namespace MEP_Check_Clash_ver1.UI
             Closed += (s,e) =>
             {
                 closed=true; RemoveResume(); application.Application.DocumentChanged -= ModelChanged;
+                foreach (var backup in savedColors.Values) backup.Original.Dispose(); savedColors.Clear();
                 Dispatcher.UnhandledException -= OwnUiException;
                 AppDomain.CurrentDomain.UnhandledException -= ObserveFatalException;
                 try { request.Dispose(); } catch (Exception ex) { Diagnostics.Write("ExternalEvent cleanup failed",ex); }
@@ -186,7 +187,7 @@ namespace MEP_Check_Clash_ver1.UI
         }
         private void Source_Changed(object sender,SelectionChangedEventArgs e) { if (!initializing) RefreshSide(Side(sender)); }
         private void Search_Changed(object sender,TextChangedEventArgs e) { if (!initializing) SearchSide(Side(sender)); }
-        private void Preset_Click(object sender,RoutedEventArgs e) { ApplyPreset(Side(sender)); }
+        private void AllCategories_Click(object sender,RoutedEventArgs e) { foreach (var item in Categories(Side(sender))) item.IsChecked=true; }
         private void ClearCategories_Click(object sender,RoutedEventArgs e) { foreach (var item in Categories(Side(sender))) item.IsChecked=false; }
         private void Scope_Changed(object sender,RoutedEventArgs e) { if (LevelsDropdown!=null) LevelsDropdown.IsEnabled=LevelScope.IsChecked==true; }
         private void Details_Changed(object sender,RoutedEventArgs e)
@@ -340,7 +341,7 @@ namespace MEP_Check_Clash_ver1.UI
         {
             var changed=e.GetDocument();
             var transactions=e.GetTransactionNames();
-            if (transactions.Count>0 && transactions.All(n => n=="Clash Solution - View Clash" || n=="Clash Solution - Section Box")) return;
+            if (transactions.Count>0 && transactions.All(n => n=="Clash Solution - View Clash" || n=="Clash Solution - Section Box" || n=="Clash Solution - Colors" || n=="Clash Solution - Restore Colors")) return;
             if (e.GetDeletedElementIds().Count==0 && !e.GetAddedElementIds().Concat(e.GetModifiedElementIds()).Any(id => !(changed.GetElement(id) is RevitView))) return;
             if (session!=null && sources.Any(s => DocumentIdentity.Same(s.Document,changed))) { session.CancelRequested=true; cancellationReason="Model changed during check; run again"; }
             else if (results.Count>0 && sources.Any(s => DocumentIdentity.Same(s.Document,changed)))
@@ -420,7 +421,7 @@ namespace MEP_Check_Clash_ver1.UI
             Func<IEnumerable<Choice>,List<SavedChoice>> choices=items => items.Select(c => new SavedChoice { Id=c.Id,Name=c.Name }).ToList();
             return new ClashProfile { Name=name, SourceAKey=Source("A")?.Key,SourceBKey=Source("B")?.Key,SourceALabel=Source("A")?.Label,SourceBLabel=Source("B")?.Label,
                 CategoriesA=choices(categoriesA.Where(c => c.IsChecked)),CategoriesB=choices(categoriesB.Where(c => c.IsChecked)),Scope=ScopeKind,Levels=choices(levels.Where(l => l.IsChecked)),
-                IncludeNonVisible=NonVisible.IsChecked==true,ShowSystemDetails=SystemDetails.IsChecked==true,FiltersA=FilterSpecs("A"),FiltersB=FilterSpecs("B"),FilterModeA=ModeA.SelectedIndex==1 ? "any" : "all",FilterModeB=ModeB.SelectedIndex==1 ? "any" : "all",Criteria=ReadCriteria() };
+                IncludeNonVisible=NonVisible.IsChecked==true,ShowSystemDetails=SystemDetails.IsChecked==true,FiltersA=FilterSpecs("A"),FiltersB=FilterSpecs("B"),FilterModeA=ModeA.SelectedIndex==1 ? "any" : "all",FilterModeB=ModeB.SelectedIndex==1 ? "any" : "all",Criteria=ReadCriteria(),ColorA=ReadClashColor(ColorAInput.Text).ToString(),ColorB=ReadClashColor(ColorBInput.Text).ToString(),ColorOnViewClash=ColorOnViewClash.IsChecked==true };
         }
         private void ApplyProfile(ClashProfile profile)
         {
@@ -442,6 +443,9 @@ namespace MEP_Check_Clash_ver1.UI
             if (UseActiveLevel) foreach (var level in levels) level.IsChecked=false;
             UpdateLevelText();
             NonVisible.IsChecked=profile.IncludeNonVisible; SystemDetails.IsChecked=profile.ShowSystemDetails;
+            updatingClashColors=true;
+            try { ColorAInput.Text=profile.ColorA ?? "#32CD32"; ColorBInput.Text=profile.ColorB ?? "#FF3333"; ColorOnViewClash.IsChecked=profile.ColorOnViewClash; }
+            finally { updatingClashColors=false; }
             var criteria=profile.Criteria ?? new ClashCriteria();
             MinVolumeInput.Text=criteria.MinVolumeCm3.ToString(CultureInfo.InvariantCulture); MinBoxInput.Text=criteria.MinIntersectionBoxMm.ToString(CultureInfo.InvariantCulture); IgnoreConnected.IsChecked=criteria.IgnoreConnectedMep;
             ClearRules("A"); ClearRules("B");
@@ -493,6 +497,7 @@ namespace MEP_Check_Clash_ver1.UI
                 var merged=profiles.ToList(); var renamed=0;
                 foreach (var profile in imported)
                 {
+                    ReadClashColor(profile.ColorA ?? "#32CD32"); ReadClashColor(profile.ColorB ?? "#FF3333");
                     var original=profile.Name;
                     var suffix=1;
                     while (merged.Any(p => string.Equals(p.Name,profile.Name,StringComparison.OrdinalIgnoreCase)))
